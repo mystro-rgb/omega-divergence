@@ -1,0 +1,60 @@
+import matplotlib.pyplot as plt
+
+# --- CONFIGURATION ---
+SEARCH_LIMIT = 200000000 # How high to search for primes
+
+def generate_primes(limit):
+    sieve = [True] * (limit + 1)
+    primes = []
+    for p in range(2, limit + 1):
+        if sieve[p]:
+            primes.append(p)
+            for i in range(p * p, limit + 1, p):
+                sieve[i] = False
+    return primes
+
+def calculate_omega_divergence(primes):
+    print("Calculating the Omega Divergence...")
+    running_sum = 1.0
+    
+    # Lists to store data for the graph
+    x_axis_blocks = []
+    y_axis_totals = []
+    
+    for i in range(len(primes) - 3):
+        p1 = primes[i]
+        p2 = primes[i+1]
+        p3 = primes[i+2]
+        p4 = primes[i+3]
+        
+        # The Unimodular Shear Engine
+        determinant = (p1 * p4) - (p2 * p3)
+        
+        # We use standard float math here to speed up the graphing process
+        running_sum += (1.0 / determinant)
+        
+        # Save the data point every 100 iterations to keep the graph clean
+        if i % 100 == 0:
+            x_axis_blocks.append(i)
+            y_axis_totals.append(running_sum)
+            
+    return x_axis_blocks, y_axis_totals
+
+# --- EXECUTION ---
+print("Generating primes...")
+prime_list = generate_primes(SEARCH_LIMIT)
+
+x_data, y_data = calculate_omega_divergence(prime_list)
+
+# --- GRAPHING ---
+print("Plotting the architecture...")
+plt.figure(figsize=(10, 6))
+plt.plot(x_data, y_data, color='red', linewidth=1.5)
+
+plt.title("The Ω(k) Divergence: Prime Symmetry Staircase", fontsize=14, fontweight='bold')
+plt.xlabel("Number of Matrix Blocks Processed (k)", fontsize=12)
+plt.ylabel("Running Total (Diverging to -Infinity)", fontsize=12)
+plt.grid(True, linestyle='--', alpha=0.6)
+
+plt.tight_layout()
+plt.show()
